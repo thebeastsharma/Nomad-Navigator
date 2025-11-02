@@ -32,7 +32,7 @@ dist-ssr
 # Environment Variables (SECRET!)
 .env.local
 .env.*.local
-
+.env
 # Vite
 .vite/
 

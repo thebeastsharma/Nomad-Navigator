@@ -4,7 +4,7 @@ import { db, auth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPo
 // Theme logic from our lib
 import { getInitialTheme, toggleTheme } from './lib/theme';
 // Firestore functions
-import { collection, onSnapshot, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore'; // <-- 1. ADDED updateDoc
 // Icons
 import { Loader2, Moon, Sun } from 'lucide-react';
 // Pages
@@ -18,7 +18,7 @@ const App = () => {
   
   // Firebase state
   const [userId, setUserId] = useState(null);
-  const [userEmail, setUserEmail] = useState(null); // <-- ADDED
+  const [userEmail, setUserEmail] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [loading, setLoading] = useState(true);
   
@@ -53,10 +53,10 @@ const App = () => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
-        setUserEmail(user.email); // <-- ADDED
+        setUserEmail(user.email);
       } else {
         setUserId(null); // User is logged out
-        setUserEmail(null); // <-- ADDED
+        setUserEmail(null);
       }
       setIsAuthReady(true);
     });
@@ -109,6 +109,7 @@ const App = () => {
         name: newTripName.trim(),
         createdAt: Date.now(),
         imageUrl: null, 
+        experience: "", // <-- 2. ADDED experience field
       });
       setNewTripName('');
     } catch (e) {
@@ -130,7 +131,23 @@ const App = () => {
     }
   }, [getTripsCollectionRef]);
 
-  // 6. Navigation Callbacks (Stable)
+  // 6. NEW: Update Trip Experience (Stable)
+  const handleUpdateExperience = useCallback(async (tripId, newExperience) => {
+    if (!getTripsCollectionRef) return;
+    
+    try {
+      const tripDocRef = doc(getTripsCollectionRef(), tripId);
+      await updateDoc(tripDocRef, {
+        experience: newExperience
+      });
+    } catch (e) {
+      console.error("Error updating experience: ", e);
+      setError("Failed to save experience.");
+    }
+  }, [getTripsCollectionRef]);
+
+
+  // 7. Navigation Callbacks (Stable)
   const onSelectTrip = useCallback((id) => {
     setSelectedTripId(id);
     setCurrentPage('TripDetails');
@@ -140,7 +157,7 @@ const App = () => {
     setCurrentPage('TripsList');
   }, []);
 
-  // 7. Auth Callbacks (Stable)
+  // 8. Auth Callbacks (Stable)
   const onLogout = useCallback(async () => {
     try {
       await signOut(auth);
@@ -165,10 +182,10 @@ const App = () => {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) { // <-- ADDED {
+    } catch (e) {
       console.error("Email Sign-In Error:", e);
       setError("Failed to sign in. Check email or password.");
-    } // <-- ADDED }
+    }
   }, []);
 
   const handleEmailSignUp = useCallback(async (email, password) => {
@@ -199,7 +216,7 @@ const App = () => {
     if (currentPage === 'TripsList') {
         return (
             <TripsListPage
-                userEmail={userEmail} // <-- CHANGED
+                userEmail={userEmail}
                 newTripName={newTripName}
                 setNewTripName={setNewTripName}
                 handleAddTrip={handleAddTrip}
@@ -224,6 +241,7 @@ const App = () => {
                     db={db}
                     userId={userId}
                     getTripsCollectionRef={getTripsCollectionRef}
+                    onUpdateExperience={handleUpdateExperience} // <-- 3. PASSING THE PROP
                 />
             );
         }
