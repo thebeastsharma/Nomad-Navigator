@@ -30,7 +30,8 @@ const TripsListPage = React.memo(({
 
             {/* --- IMAGE BANNER REMOVED --- */}
 
-            <h1 className="text-4xl font-extrabold text-orange-600 dark:text-orange-400 flex items-center justify-center space-x-2">
+            {/* FIX: Added px-16 here to prevent overlap with side buttons */}
+            <h1 className="text-4xl font-extrabold text-orange-600 dark:text-orange-400 flex items-center justify-center space-x-2 px-16">
                 <Plane className="w-10 h-10" />
                 <span>NOMAD NAVIGATOR</span>
             </h1>
