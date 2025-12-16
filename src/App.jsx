@@ -109,7 +109,8 @@ const App = () => {
         name: newTripName.trim(),
         createdAt: Date.now(),
         imageUrl: null, 
-        experience: "", // <-- 2. ADDED experience field
+        experience: "", 
+        ownerId: userId,// <-- 2. ADDED experience field
       });
       setNewTripName('');
     } catch (e) {
@@ -117,7 +118,7 @@ const App = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [newTripName, getTripsCollectionRef]);
+  }, [newTripName, getTripsCollectionRef, userId]);
 
   // 5. Delete Trip (Stable)
   const handleDeleteTrip = useCallback(async (id) => {
